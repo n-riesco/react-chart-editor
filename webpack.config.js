@@ -30,7 +30,7 @@ module.exports = {
             ],
           },
         },
-        exclude: /node_modules/,
+        exclude: [/node_modules/],
       },
       {
         test: /\.(css|scss)?$/,
@@ -38,6 +38,7 @@ module.exports = {
       },
     ],
   },
+  plugins: [new webpack.NamedModulesPlugin()],
   devServer: {
     open: true,
     contentBase: './dev',

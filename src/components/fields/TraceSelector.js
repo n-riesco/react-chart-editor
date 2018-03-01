@@ -6,72 +6,18 @@ import {
   traceTypeToPlotlyInitFigure,
   localize,
   plotlyTraceToCustomTrace,
+  computeTraceOptionsFromSchema,
 } from 'lib';
-
-function computeTraceOptionsFromSchema(schema, _, context) {
-  // Filter out Polar "area" type as it is fairly broken and we want to present
-  // scatter with fill as an "area" chart type for convenience.
-  const traceTypes = Object.keys(schema.traces).filter(
-    t => !['area', 'scattermapbox'].includes(t)
-  );
-
-  // explicit map of all supported trace types (as of plotlyjs 1.32)
-  const traceOptions = [
-    {value: 'scatter', label: _('Scatter')},
-    {value: 'box', label: _('Box')},
-    {value: 'bar', label: _('Bar')},
-    {value: 'heatmap', label: _('Heatmap')},
-    // {value: 'histogram', label: _('Histogram')},
-    // {value: 'histogram2d', label: _('2D Histogram')},
-    // {value: 'histogram2dcontour', label: _('2D Contour Histogram')},
-    {value: 'pie', label: _('Pie')},
-    {value: 'contour', label: _('Contour')},
-    {value: 'scatterternary', label: _('Ternary Scatter')},
-    // {value: 'violin', label: _('Violin')},
-    {value: 'scatter3d', label: _('3D Scatter')},
-    {value: 'surface', label: _('Surface')},
-    {value: 'mesh3d', label: _('3D Mesh')},
-    {value: 'scattergeo', label: _('Atlas Map')},
-    {value: 'choropleth', label: _('Choropleth')},
-    // {value: 'scattergl', label: _('Scatter GL')},
-    // {value: 'pointcloud', label: _('Point Cloud')},
-    // {value: 'heatmapgl', label: _('Heatmap GL')},
-    // {value: 'parcoords', label: _('Parallel Coordinates')},
-    // {value: 'sankey', label: _('Sankey')},
-    // {value: 'table', label: _('Table')},
-    // {value: 'carpet', label: _('Carpet')},
-    // {value: 'scattercarpet', label: _('Carpet Scatter')},
-    // {value: 'contourcarpet', label: _('Carpet Contour')},
-    {value: 'ohlc', label: _('OHLC')},
-    {value: 'candlestick', label: _('Candlestick')},
-    // {value: 'scatterpolar', label: _('Polar Scatter')},
-  ].filter(obj => traceTypes.indexOf(obj.value) !== -1);
-
-  const traceIndex = traceType =>
-    traceOptions.findIndex(opt => opt.value === traceType);
-
-  traceOptions.splice(
-    traceIndex('scatter') + 1,
-    0,
-    {label: _('Line'), value: 'line'},
-    {label: _('Area'), value: 'area'}
-  );
-
-  traceOptions.splice(traceIndex('scatter3d') + 1, 0, {
-    label: _('3D Line'),
-    value: 'line3d',
-  });
-
-  if (context.config && context.config.mapboxAccessToken) {
-    traceOptions.push({value: 'scattermapbox', label: _('Satellite Map')});
-  }
-
-  return traceOptions;
-}
+import {EDITOR_ACTIONS} from 'lib/constants';
+import TraceTypeSelector, {
+  TraceTypeSelectorButton,
+} from 'components/widgets/TraceTypeSelector';
+import Field from './Field';
 
 class TraceSelector extends Component {
   constructor(props, context) {
     super(props, context);
+
     this.updatePlot = this.updatePlot.bind(this);
 
     let fillMeta;
@@ -102,6 +48,8 @@ class TraceSelector extends Component {
     const _ = props.localize;
     if (props.traceOptions) {
       this.traceOptions = props.traceOptions;
+    } else if (context.traceTypesConfig) {
+      this.traceOptions = context.traceTypesConfig.traces(_);
     } else if (context.plotSchema) {
       this.traceOptions = computeTraceOptionsFromSchema(
         context.plotSchema,
@@ -111,14 +59,11 @@ class TraceSelector extends Component {
     } else {
       this.traceOptions = [{label: _('Scatter'), value: 'scatter'}];
     }
-    if (props.container) {
-      this.fullValue = plotlyTraceToCustomTrace(props.container);
-    }
+    this.fullValue = plotlyTraceToCustomTrace(props.container);
   }
 
   setTraceDefaults(container, fullContainer, updateContainer) {
     if (
-      container &&
       container.uid &&
       !container.mode &&
       fullContainer._fullInput.type === 'scatter'
@@ -138,7 +83,6 @@ class TraceSelector extends Component {
 
   updatePlot(value) {
     const {updateContainer} = this.props;
-
     if (updateContainer) {
       updateContainer(traceTypeToPlotlyInitFigure(value));
     }
@@ -151,12 +95,28 @@ class TraceSelector extends Component {
       options: this.traceOptions,
       clearable: false,
     });
+    // Check and see if the advanced selector prop is true
+    const {advancedTraceTypeSelector} = this.context;
+    if (advancedTraceTypeSelector) {
+      return (
+        <Field {...props}>
+          <TraceTypeSelectorButton
+            {...props}
+            traceTypesConfig={this.context.traceTypesConfig}
+            handleClick={() => this.context.openModal(TraceTypeSelector, props)}
+          />
+        </Field>
+      );
+    }
 
     return <UnconnectedDropdown {...props} />;
   }
 }
 
 TraceSelector.contextTypes = {
+  openModal: PropTypes.func,
+  advancedTraceTypeSelector: PropTypes.bool,
+  traceTypesConfig: PropTypes.object,
   plotSchema: PropTypes.object,
   config: PropTypes.object,
 };
@@ -170,4 +130,47 @@ TraceSelector.propTypes = {
   updateContainer: PropTypes.func,
 };
 
-export default connectToContainer(localize(TraceSelector));
+export default connectToContainer(localize(TraceSelector), {
+  modifyPlotProps: (props, context) => {
+    if (!context.container) {
+      return;
+    }
+    if (
+      plotlyTraceToCustomTrace(context.container) === 'timeseries' &&
+      (!context.layout.xaxis ||
+        !context.layout.xaxis.rangeslider ||
+        !context.layout.xaxis.rangeslider.visible)
+    ) {
+      context.onUpdate({
+        type: EDITOR_ACTIONS.UPDATE_LAYOUT,
+        payload: {
+          update: {
+            xaxis: {
+              rangeslider: {visible: true},
+            },
+          },
+        },
+      });
+    }
+
+    if (
+      ['timeseries', 'candlestick', 'ohlc'].indexOf(
+        plotlyTraceToCustomTrace(context.container)
+      ) === -1 &&
+      context.fullLayout.xaxis &&
+      context.fullLayout.xaxis.rangeslider &&
+      context.fullLayout.xaxis.rangeslider.visible
+    ) {
+      context.onUpdate({
+        type: EDITOR_ACTIONS.UPDATE_LAYOUT,
+        payload: {
+          update: {
+            xaxis: {
+              rangeslider: {visible: false},
+            },
+          },
+        },
+      });
+    }
+  },
+});

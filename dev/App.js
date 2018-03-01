@@ -1,3 +1,4 @@
+
 import React, {Component} from 'react';
 import {hot} from 'react-hot-loader';
 import plotly from 'plotly.js/dist/plotly';
@@ -83,6 +84,7 @@ class App extends Component {
             dataSources={dataSources}
             dataSourceOptions={dataSourceOptions}
             plotly={plotly}
+            advancedTraceTypeSelector
           />
           <div className="app__main" style={{width: '100%', height: '100%'}}>
             <Plot

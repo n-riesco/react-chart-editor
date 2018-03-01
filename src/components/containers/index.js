@@ -12,21 +12,25 @@ import TraceMarkerSection from './TraceMarkerSection';
 import {LayoutPanel, TraceTypeSection} from './derived';
 import TraceRequiredPanel from './TraceRequiredPanel';
 import SingleSidebarItem from './SingleSidebarItem';
+import ModalProvider from './ModalProvider';
+import Modal from './Modal';
 
 export {
   AnnotationAccordion,
+  AxesFold,
   AxisRequiredPanel,
-  ShapeAccordion,
-  ImageAccordion,
-  MenuPanel,
   Fold,
+  ImageAccordion,
+  LayoutPanel,
+  MenuPanel,
+  Modal,
+  ModalProvider,
   Panel,
   Section,
+  ShapeAccordion,
+  SingleSidebarItem,
   TraceAccordion,
   TraceMarkerSection,
   TraceRequiredPanel,
-  LayoutPanel,
-  AxesFold,
-  SingleSidebarItem,
   TraceTypeSection,
 };

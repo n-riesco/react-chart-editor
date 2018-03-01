@@ -10,11 +10,6 @@ import connectToContainer, {
 import connectTraceToPlot from './connectTraceToPlot';
 import dereference from './dereference';
 import findFullTraceIndex from './findFullTraceIndex';
-import getAllAxes, {
-  axisIdToAxisName,
-  traceTypeToAxisType,
-  getAxisTitle,
-} from './getAllAxes';
 import localize, {localizeString} from './localize';
 import tinyColor from 'tinycolor2';
 import unpackPlotProps from './unpackPlotProps';
@@ -52,8 +47,9 @@ function renderTraceIcon(trace) {
     : PlotlyIcons.PlotLineIcon;
 }
 
+import {computeTraceOptionsFromSchema} from './computeTraceOptionsFromSchema';
+
 export {
-  axisIdToAxisName,
   bem,
   capitalize,
   clamp,
@@ -65,11 +61,10 @@ export {
   connectToContainer,
   connectTraceToPlot,
   containerConnectedContextTypes,
+  computeTraceOptionsFromSchema,
   traceTypeToPlotlyInitFigure,
   dereference,
   findFullTraceIndex,
-  getAllAxes,
-  getAxisTitle,
   getDisplayName,
   getLayoutContext,
   isPlainObject,
@@ -81,5 +76,4 @@ export {
   walkObject,
   supplyLayoutPlotProps,
   striptags,
-  traceTypeToAxisType,
 };
