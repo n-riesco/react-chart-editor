@@ -16,14 +16,22 @@ class Dropzone extends Component {
   componentWillMount() {
     const _ = this.props.localize;
 
-    let content = _('Drop file to upload');
+    let content = (
+      <div className="dropzone-container__message">
+        {_('Drop file to upload')}
+      </div>
+    );
 
     if (this.props.fileType === 'shapefile') {
       if (this.props.value && this.props.value !== '') {
-        content = <div>{_('GeoJSON loaded!')}</div>;
+        content = (
+          <div className="dropzone-container__message">
+            {_('GeoJSON loaded!')}
+          </div>
+        );
       } else {
         content = (
-          <div>
+          <div className="dropzone-container__message">
             <p>{_('Drop shapefile to upload.')}</p>
             <p>
               {_(
@@ -38,10 +46,15 @@ class Dropzone extends Component {
 
     if (this.props.fileType === 'image') {
       if (this.props.value && this.props.value !== '') {
-        content = <img src={this.props.value} />;
+        content = (
+          <div
+            className="dropzone-container__image"
+            style={{backgroundImage: `url(${this.props.value})`}}
+          />
+        );
       } else {
         content = (
-          <div>
+          <div className="dropzone-container__message">
             <p>{_('Drop image to upload.')}</p>
             <p>
               {_('Supported formats are: jpeg/jpg, svg, png, gif, bmp, webp.')}
@@ -55,18 +68,29 @@ class Dropzone extends Component {
   }
 
   onLoad(e, isJson) {
+    const _ = this.props.localize;
+
     if (this.props.fileType === 'shapefile') {
-      const parsingError = _(
-        'Yikes! An error occurred while parsing this file. ' +
-          'Try again with a GeoJSON file (json/geojson) or a zip file containing ' +
-          'a shp, shx, and dbf file.'
+      const parsingError = (
+        <div className="dropzone-container__message">
+          <p>{_('Yikes! An error occurred while parsing this file.')}</p>
+          <p>
+            {_(
+              'Try again with a GeoJSON file (json/geojson) or a zip file containing a shp, shx, and dbf file.'
+            )}
+          </p>
+        </div>
       );
 
       if (isJson) {
         try {
           this.props.onUpdate(JSON.parse(e.target.result));
           this.setState({
-            content: _('GeoJSON loaded!'),
+            content: (
+              <div className="dropzone-container__message">
+                {_('GeoJSON loaded!')}
+              </div>
+            ),
           });
         } catch (error) {
           this.setState({
@@ -80,7 +104,11 @@ class Dropzone extends Component {
         .then(geojson => {
           this.props.onUpdate(geojson);
           this.setState({
-            content: _('GeoJSON loaded!'),
+            content: (
+              <div className="dropzone-container__message">
+                {_('GeoJSON loaded!')}
+              </div>
+            ),
           });
         })
         .catch(e => {
@@ -95,14 +123,27 @@ class Dropzone extends Component {
       try {
         this.props.onUpdate(e.target.result);
         this.setState({
-          content: <img src={e.target.result} />,
+          content: (
+            <div
+              className="dropzone-container__image"
+              style={{
+                backgroundImage: `url(${e.target.result})`,
+              }}
+            />
+          ),
         });
       } catch (error) {
         console.warn(error);
         this.setState({
-          content: _(
-            'Yikes! An error occurred while parsing this file. ' +
-              'Try again with a jpeg/jpg, svg, png, gif, bmp, or webp file.'
+          content: (
+            <div className="dropzone-container__message">
+              <p>{_('Yikes! An error occurred while parsing this file.')}</p>
+              <p>
+                {_(
+                  'Try again with a jpeg/jpg, svg, png, gif, bmp, or webp file.'
+                )}
+              </p>
+            </div>
           ),
         });
       }
@@ -114,10 +155,15 @@ class Dropzone extends Component {
 
     if (file.length > 1) {
       this.setState({
-        content: _(
-          'Yikes! You can only upload one file at a time. ' +
-            'To upload multiple files, create multiple files and ' +
-            'upload them individually.'
+        content: (
+          <div className="dropzone-container__message">
+            <p>{_('Yikes! You can only upload one file at a time.')}</p>
+            <p>
+              {_(
+                'To upload multiple files, create multiple files and upload them individually.'
+              )}
+            </p>
+          </div>
         ),
       });
       return;
@@ -132,9 +178,17 @@ class Dropzone extends Component {
     if (this.props.fileType === 'shapefile') {
       if (!['.json', '.geojson', '.zip'].some(t => file[0].name.endsWith(t))) {
         this.setState({
-          content: _(
-            "Yikes! This doesn't look like a valid shapefile to us. " +
-              'Try again with a json/geojson, or zip with a shp, shx, and dbf file. '
+          content: (
+            <div className="dropzone-container__message">
+              <p>
+                {_("Yikes! This doesn't look like a valid shapefile to us. ")}
+              </p>
+              <p>
+                {_(
+                  'Try again with a json/geojson, or zip with a shp, shx, and dbf file. '
+                )}
+              </p>
+            </div>
           ),
         });
       } else {
@@ -155,9 +209,17 @@ class Dropzone extends Component {
         reader.readAsDataURL(file[0]);
       } else {
         this.setState({
-          content: _(
-            "Yikes! This doesn't look like a valid image file to us. " +
-              'Try again with a jpg/jpeg, png, svg, bmp, webp or gif file. '
+          content: (
+            <div className="dropzone-container__message">
+              <p>
+                {_("Yikes! This doesn't look like a valid image file to us.")}
+              </p>
+              <p>
+                {_(
+                  'Try again with a jpg/jpeg, png, svg, bmp, webp or gif file.'
+                )}
+              </p>
+            </div>
           ),
         });
       }
@@ -166,18 +228,14 @@ class Dropzone extends Component {
 
   render() {
     return (
-      <Drop ref="dzone" onDrop={this.onDrop} disableClick={true}>
-        <div
-          style={{
-            padding: '10px',
-            width: '100%',
-            height: '100%',
-            margin: '0 auto',
-            textAlign: 'center',
-          }}
-        >
-          {this.state.content}
-        </div>
+      <Drop
+        ref="dzone"
+        onDrop={this.onDrop}
+        disableClick={true}
+        className="dropzone-container"
+        activeClassName="dropzone-container--active"
+      >
+        <div className="dropzone-container__content">{this.state.content}</div>
       </Drop>
     );
   }
