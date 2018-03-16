@@ -38,12 +38,14 @@ import {
   TraceOrientation,
   TraceSelector,
   UpdateMenuButtons,
+  Dropzone,
 } from './fields';
 
 import {
   AnnotationAccordion,
   ShapeAccordion,
   SliderAccordion,
+  ShapefileAccordion,
   ImageAccordion,
   UpdateMenuAccordion,
   AxesFold,
@@ -123,4 +125,6 @@ export {
   TraceTypeSection,
   SectionHeader,
   UpdateMenuButtons,
+  Dropzone,
+  ShapefileAccordion,
 };

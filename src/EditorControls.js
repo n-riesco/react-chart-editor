@@ -204,6 +204,24 @@ class EditorControls extends Component {
         }
         break;
 
+      case EDITOR_ACTIONS.DELETE_SHAPEFILE:
+        if (isNumeric(payload.shapefileIndex)) {
+          if (this.props.beforeDeleteShapefile) {
+            this.props.beforeDeleteShapefile(payload);
+          }
+          graphDiv.layout.mapbox.layers.splice(payload.shapefileIndex, 1);
+          if (this.props.afterDeleteShapefile) {
+            this.props.afterDeleteShapefile(payload);
+          }
+          if (this.props.onUpdate) {
+            this.props.onUpdate(
+              graphDiv.data,
+              Object.assign({}, graphDiv.layout)
+            );
+          }
+        }
+        break;
+
       case EDITOR_ACTIONS.DELETE_IMAGE:
         if (isNumeric(payload.imageIndex)) {
           if (this.props.beforeDeleteImage) {
