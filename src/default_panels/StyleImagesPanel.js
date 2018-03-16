@@ -33,6 +33,7 @@ const StyleImagesPanel = ({localize: _}) => (
         {label: _('Fill'), value: 'fill'},
         {label: _('Stretch'), value: 'stretch'},
       ]}
+      clearable={false}
     />
     <PositioningNumeric attr="sizex" label={_('Width')} />
     <PositioningNumeric attr="sizey" label={_('Height')} />

@@ -31,7 +31,9 @@ class TraceRequiredPanel extends Component {
 
     if (this.props.visible) {
       conditions.forEach((condition, index) => {
-        if (!showPanel) {return;}
+        if (!showPanel) {
+          return;
+        }
         if (!condition()) {
           showPanel = false;
           emptyPanelMessage.heading = messages[index].heading;

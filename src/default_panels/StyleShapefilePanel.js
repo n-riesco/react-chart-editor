@@ -5,6 +5,7 @@ import {
   ShapefileAccordion,
   ColorPicker,
   NumericFraction,
+  Numeric,
 } from '../components';
 
 import {localize} from '../lib';
@@ -14,6 +15,13 @@ const StyleShapefilePanel = ({localize: _}) => (
     <Dropzone attr="source" fileType="shapefile" />
     <ColorPicker attr="color" label={_('Color')} />
     <NumericFraction attr="opacity" label={_('Opacity')} />
+    <Numeric
+      attr="circle.radius"
+      label={_('Circle Radius')}
+      showSlider
+      min={1}
+      max={20}
+    />
   </ShapefileAccordion>
 );
 
